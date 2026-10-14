@@ -1,0 +1,78 @@
+name: 🤖 Бот 24/7
+
+on:
+  schedule:
+    - cron: '*/1 * * * *'   # каждую минуту: активный запуск + один в очереди
+  workflow_dispatch:         # ручной запуск
+
+# Ровно один экземпляр бота: один активный запуск и максимум один в очереди.
+# Как только активный заканчивается (лимит ~6 ч), очередь стартует сразу.
+concurrency:
+  group: telegram-bot
+  cancel-in-progress: false
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+    # Лимит платформы — 6 часов; останавливаемся сами чуть раньше,
+    # чтобы успеть сохранить БД.
+    timeout-minutes: 355
+
+    steps:
+      - name: 📥 Код бота
+        uses: actions/checkout@v4
+
+      - name: 🗃 Загрузить БД из приватного репозитория
+        env:
+          DB_TOKEN: ${{ secrets.DB_TOKEN }}
+          DB_REPO: ${{ secrets.DB_REPO }}
+        run: |
+          git clone --depth 1 "https://x-access-token:${DB_TOKEN}@github.com/${DB_REPO}" /tmp/dbrepo
+          if [ -f /tmp/dbrepo/shop.db ]; then
+            cp /tmp/dbrepo/shop.db ./shop.db
+            echo "БД загружена"
+          else
+            echo "shop.db ещё нет в репозитории БД — бот создаст её при старте"
+          fi
+
+      - name: 🐍 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+
+      - name: 📦 Зависимости
+        run: pip install -r requirements.txt
+
+      - name: 🤖 Запуск бота (~5 ч 50 мин, затем перезапуск из очереди)
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          ADMIN_IDS: ${{ secrets.ADMIN_IDS }}
+          CURRENCY: ${{ secrets.CURRENCY || 'сом' }}
+          MANAGER_USERNAME: ${{ secrets.MANAGER_USERNAME || '@your_manager' }}
+          AUTO_CONFIRM_ORDERS: ${{ secrets.AUTO_CONFIRM_ORDERS || 'True' }}
+          DELIVERY_MIN_DAYS: ${{ secrets.DELIVERY_MIN_DAYS || '18' }}
+          DELIVERY_MAX_DAYS: ${{ secrets.DELIVERY_MAX_DAYS || '25' }}
+          DB_NAME: shop.db
+        # 20400 сек = 5 ч 50 мин. Telegram держит входящие сообщения в очереди,
+        # пока бота нет — клиенты ничего не теряют.
+        run: timeout --signal=TERM 20400 python bot.py || true
+
+      - name: 💾 Сохранить БД в приватный репозиторий
+        if: always()
+        env:
+          DB_TOKEN: ${{ secrets.DB_TOKEN }}
+          DB_REPO: ${{ secrets.DB_REPO }}
+        run: |
+          git clone --depth 1 "https://x-access-token:${DB_TOKEN}@github.com/${DB_REPO}" /tmp/dbrepo
+          cp shop.db /tmp/dbrepo/shop.db
+          cd /tmp/dbrepo
+          git config user.name "shop-bot-sync"
+          git config user.email "actions@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "изменений в БД нет"
+            exit 0
+          fi
+          git commit -m "sync $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          git push
