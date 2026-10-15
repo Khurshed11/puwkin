@@ -68,6 +68,22 @@ python upload_photos.py --force    # перегенерировать все ф�
 
 ---
 
+## 🌐 Мини-каталог (Telegram Mini App)
+Каталог доступен и как веб-окно прямо в Telegram:
+https://khurshed11.github.io/puwkin/
+
+- Открывается кнопкой **🛍 Каталог** в меню чата (слева от поля ввода)
+  или кнопкой **🌐 Мини-каталог** в клавиатуре бота.
+- Это статичная страница на GitHub Pages (`webapp/`), данные — `catalog.json`,
+  который собирает `build_webapp.py` из `shop.db` (фото скачиваются через
+  Bot API токеном из секретов — токен в репозиторий не попадает).
+- Обновляется автоматически: workflow `webapp.yml` при каждом пуше кода и
+  каждые 3 часа (читает свежую БД из приватного репозитория).
+- Локальная сборка для просмотра: `python build_webapp.py`, затем
+  `python -m http.server -d webapp 8080` и открыть http://localhost:8080.
+
+---
+
 ## ⚙️ Для владельца (админ-панель)
 Откройте командой `/admin` или кнопкой **⚙️ Админ-панель** (видна только админам).
 
@@ -90,6 +106,8 @@ puwkin/
 ├── config.py              # настройки из .env
 ├── states.py              # FSM-состояния
 ├── upload_photos.py       # демо-фото каталога (Pillow → file_id в БД)
+├── build_webapp.py        # сборка webapp/catalog.json + фото для мини-аппа
+├── webapp/                # Telegram Mini App (GitHub Pages)
 ├── database/
 │   ├── db.py              # движок SQLAlchemy
 │   ├── models.py          # таблицы БД
