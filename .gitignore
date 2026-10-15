@@ -12,6 +12,9 @@ venv/
 *.db
 *.sqlite3
 
+# --- Сгенерированные картинки (фото хранятся в БД как file_id) ---
+media_tmp/
+
 # --- IDE ---
 .vscode/
 .idea/
