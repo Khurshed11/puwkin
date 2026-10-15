@@ -1,0 +1,62 @@
+name: 🌐 Веб-каталог (Pages)
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '43 */3 * * *'   # каждые 3 часа — обновить данные из БД
+  workflow_dispatch:
+
+concurrency:
+  group: webapp-deploy
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - name: 📥 Код
+        uses: actions/checkout@v4
+
+      - name: 🗃 Загрузить БД из приватного репозитория
+        env:
+          DB_TOKEN: ${{ secrets.DB_TOKEN }}
+          DB_REPO: ${{ secrets.DB_REPO }}
+        run: |
+          git clone --depth 1 "https://x-access-token:${DB_TOKEN}@github.com/${DB_REPO}" /tmp/dbrepo
+          cp /tmp/dbrepo/shop.db ./shop.db
+
+      - name: 🐍 Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          cache: 'pip'
+
+      - name: 📦 Зависимости
+        run: pip install -r requirements.txt
+
+      - name: 🏗 Сборка каталога (фото + catalog.json)
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
+          CURRENCY: ${{ secrets.CURRENCY || 'сом' }}
+        run: python build_webapp.py
+
+      - name: ⚙️ Подготовка Pages
+        uses: actions/configure-pages@v5
+
+      - name: 📤 Загрузка артефакта
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: webapp
+
+      - name: 🚀 Деплой
+        id: deploy
+        uses: actions/deploy-pages@v4

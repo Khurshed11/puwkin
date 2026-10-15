@@ -15,6 +15,10 @@ venv/
 # --- Сгенерированные картинки (фото хранятся в БД как file_id) ---
 media_tmp/
 
+# --- Артефакты сборки мини-аппа (генерирует build_webapp.py) ---
+webapp/catalog.json
+webapp/photos/
+
 # --- IDE ---
 .vscode/
 .idea/

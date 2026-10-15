@@ -7,6 +7,7 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.client.session.aiohttp import AiohttpSession
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
+from aiogram.types import MenuButtonWebApp, WebAppInfo
 
 from config import settings
 from database.db import create_tables
@@ -78,6 +79,20 @@ async def main() -> None:
     dp.include_router(extras.router)
 
     await bot.delete_webhook(drop_pending_updates=True)
+
+    # Кнопка мини-аппа в меню чата (рядом с полем ввода)
+    if settings.WEBAPP_URL:
+        try:
+            await bot.set_chat_menu_button(
+                menu_button=MenuButtonWebApp(
+                    text="🛍 Каталог",
+                    web_app=WebAppInfo(url=settings.WEBAPP_URL),
+                )
+            )
+            logger.info("Кнопка мини-аппа установлена: %s", settings.WEBAPP_URL)
+        except Exception as e:  # не критично — бот работает и без неё
+            logger.warning("Мини-апп: кнопка меню не установлена: %s", e)
+
     logger.info("Бот запущен.")
     await dp.start_polling(bot)
 

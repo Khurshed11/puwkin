@@ -1,0 +1,137 @@
+/* ===== Тема Telegram Mini App (с запасом для обычного браузера) ===== */
+:root {
+  --bg: var(--tg-theme-bg_color, #ffffff);
+  --text: var(--tg-theme-text_color, #1a1a1a);
+  --hint: var(--tg-theme-hint_color, #8a8a8a);
+  --secondary-bg: var(--tg-theme-secondary_bg_color, #f1f1f4);
+  --accent: var(--tg-theme-button_color, #2ea6ff);
+  --accent-text: var(--tg-theme-button_text_color, #ffffff);
+  --card: var(--tg-theme-secondary_bg_color, #f7f7f9);
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+body {
+  padding-bottom: calc(76px + env(safe-area-inset-bottom));
+  min-height: 100vh;
+}
+
+/* ===== Шапка ===== */
+#topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--secondary-bg);
+  padding: calc(10px + env(safe-area-inset-top)) 14px 10px;
+  border-bottom: 1px solid rgba(128, 128, 128, 0.15);
+}
+#shop-name { font-size: 18px; font-weight: 700; }
+#shop-meta { font-size: 12.5px; color: var(--hint); margin-top: 2px; }
+
+/* ===== Категории ===== */
+#cats {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 10px 14px;
+  scrollbar-width: none;
+}
+#cats::-webkit-scrollbar { display: none; }
+.chip {
+  flex: 0 0 auto;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: var(--card);
+  color: var(--text);
+  font-size: 13.5px;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+.chip.active {
+  background: var(--accent);
+  color: var(--accent-text);
+}
+
+/* ===== Карточки ===== */
+#content { padding: 4px 14px 16px; }
+.status { color: var(--hint); text-align: center; padding: 30px 0; }
+.status.error { color: #d33; }
+
+.card {
+  background: var(--card);
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 14px;
+}
+.card .photo {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  display: block;
+  background: var(--secondary-bg);
+}
+.card .photo-placeholder {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 64px;
+  font-weight: 800;
+  color: var(--hint);
+  background: var(--secondary-bg);
+}
+.card .body { padding: 12px 14px 14px; }
+.card h2 { margin: 0 0 6px; font-size: 16px; font-weight: 700; }
+.price { font-size: 16px; font-weight: 800; color: var(--accent); }
+.price.unknown { color: var(--hint); font-weight: 600; font-size: 14px; }
+.meta { margin-top: 4px; font-size: 13px; color: var(--hint); }
+.desc {
+  margin-top: 8px;
+  font-size: 13.5px;
+  white-space: pre-line;
+  color: var(--text);
+  opacity: 0.85;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.desc.open { -webkit-line-clamp: unset; }
+.more {
+  margin-top: 4px;
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--accent);
+  font-size: 13px;
+  cursor: pointer;
+}
+
+/* ===== Кнопка «Открыть бота» ===== */
+.bot-cta {
+  position: fixed;
+  left: 14px;
+  right: 14px;
+  bottom: calc(12px + env(safe-area-inset-bottom));
+  z-index: 20;
+  display: block;
+  text-align: center;
+  padding: 13px;
+  border-radius: 12px;
+  background: var(--accent);
+  color: var(--accent-text);
+  font-size: 15px;
+  font-weight: 700;
+  text-decoration: none;
+}

@@ -24,6 +24,9 @@ class Settings(BaseSettings):
 
     DB_NAME: str = "shop.db"
 
+    # URL Telegram Mini App (GitHub Pages). Пусто — кнопки мини-аппа скрыты.
+    WEBAPP_URL: str = "https://khurshed11.github.io/puwkin/"
+
     @property
     def admin_ids(self) -> list[int]:
         """Список ID админов из строки '123,456'."""
